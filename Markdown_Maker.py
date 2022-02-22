@@ -11,7 +11,7 @@ def open_file():
 
 def save_file():
     file_returned = app.select_file(filetypes=[["All files", "*.*"], ["Text documents", "*.txt"]], save=True)
-    if file_returned != ():
+    if file_returned != '':
         file_name.value = file_returned 
         with open(file_name.value, "w") as f:
             f.write(editor.value)
