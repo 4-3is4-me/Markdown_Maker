@@ -1,8 +1,14 @@
 from guizero import App, TextBox, PushButton, Box, MenuBar
+import sys # just for a clean exit when using pyinstaller
 
 def open_file():
-    file_returned = app.select_file(filetypes=[["All files", "*.*"], ["Text documents", "*.txt"]])
-    if file_returned != ():
+    if file_name.value != 'README.md':
+        folder_index = file_name.value.rfind("/")
+        folder_path = file_name.value[:folder_index:]
+    else:
+        folder_path = '.'
+    file_returned = app.select_file(folder=folder_path, filetypes=[["All files", "*.*"], ["Text documents", "*.txt"]])
+    if file_returned != '':
         file_name.value = file_returned
         with open(file_name.value, "r") as f:
             editor.value = f.read()
@@ -10,7 +16,12 @@ def open_file():
         return
 
 def save_file():
-    file_returned = app.select_file(filetypes=[["All files", "*.*"], ["Text documents", "*.txt"]], save=True)
+    if file_name.value != 'README.md':
+        folder_index = file_name.value.rfind("/")
+        folder_path = file_name.value[:folder_index:]
+    else:
+        folder_path = '.'
+    file_returned = app.select_file(folder=folder_path, filetypes=[["All files", "*.*"], ["Text documents", "*.txt"]], save=True)
     if file_returned != '':
         file_name.value = file_returned 
         with open(file_name.value, "w") as f:
@@ -23,7 +34,7 @@ def enable_save():
     save_button.enable()
 
 def exit_app():
-    exit()
+    sys.exit(0)
     
 def dark_theme():
     editor.bg = "black"
@@ -33,7 +44,7 @@ def dark_theme():
 def light_theme():
     editor.bg = "white"
     editor.text_color = "black"
-    editor.tk.config(insertbackground="white")
+    editor.tk.config(insertbackground="black")
 
 def insert(key):
     editor.tk.insert(editor.cursor_position, key)
@@ -41,14 +52,17 @@ def insert(key):
 app = App(title = "Markdown Maker", width = "1000", height = "500")
 
 menubar = MenuBar(app,
-                  # These are the menu options
-                  toplevel=["File", "Options"],
-                  # The options are recorded in a nested lists, one list for each menu option
-                  # Each option is a list containing a name and a function
-                  options=[
-                      [ ["Open", open_file], ["Save", save_file], ["Exit", exit_app] ],
-                      [ ["Dark theme", dark_theme], ["Light theme", light_theme] ],
-                        ])
+                # These are the menu options
+                toplevel=["File", "Options", "Font Size"],
+                # The options are recorded in a nested lists, one list for each menu option
+                # Each option is a list containing a name and a function
+                options=[
+                    [ ["Open", open_file], ["Save", save_file], ["Exit", exit_app] ],
+                    [ ["Dark theme", dark_theme], ["Light theme", light_theme] ],
+                    [ ["Small", lambda: editor.tk.config(font=("Verdana", 10))], 
+                    ["Medium", lambda: editor.tk.config(font=("Verdana", 15))],
+                    ["Large", lambda: editor.tk.config(font=("Verdana", 25))] ]
+                    ])
 
 file_controls = Box(app, align="top", width="fill", border=True)
 file_name = TextBox(file_controls, text="README.md", width="fill", align="left")
